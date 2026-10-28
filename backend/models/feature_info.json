@@ -1,0 +1,111 @@
+{
+  "feature_cols": [
+    "district_enc",
+    "season_enc",
+    "crop_enc",
+    "temp_mean",
+    "rain_total"
+  ],
+  "location_feature": "district_key = state | district",
+  "years_sorted": [
+    1998,
+    1999,
+    2000,
+    2001,
+    2002,
+    2003,
+    2004,
+    2005,
+    2006,
+    2007,
+    2008,
+    2009,
+    2010,
+    2011
+  ],
+  "train_years": [
+    1998,
+    1999,
+    2000,
+    2001,
+    2002,
+    2003,
+    2004,
+    2005,
+    2006,
+    2007
+  ],
+  "val_years": [
+    2008,
+    2009
+  ],
+  "test_years": [
+    2010,
+    2011
+  ],
+  "weights": {
+    "RandomForest": 0.31167521120070385,
+    "XGBoost": 0.32832407635234295,
+    "HistGradientBoosting": 0.3600007124469532
+  },
+  "val_maes": {
+    "RandomForest": 1.3998156233085788,
+    "XGBoost": 1.3288328863477599,
+    "HistGradientBoosting": 1.211908240601146
+  },
+  "tuned_params": {
+    "RandomForest": {
+      "n_estimators": 160,
+      "max_depth": 14,
+      "min_samples_split": 6,
+      "min_samples_leaf": 5
+    },
+    "XGBoost": {
+      "n_estimators": 250,
+      "max_depth": 8,
+      "learning_rate": 0.08,
+      "subsample": 0.85,
+      "colsample_bytree": 0.85
+    },
+    "HistGradientBoosting": {
+      "max_iter": 250,
+      "max_depth": 8,
+      "learning_rate": 0.08,
+      "l2_regularization": 0.0,
+      "categorical_features": [
+        1,
+        2
+      ]
+    }
+  },
+  "n_train": 122383,
+  "n_validation": 23429,
+  "n_test": 7562,
+  "test_metrics": {
+    "RandomForest": {
+      "R2": 0.906293775783347,
+      "MAE": 1.0914933772462159,
+      "RMSE": 3.5843415876513034
+    },
+    "XGBoost": {
+      "R2": 0.8907519659927015,
+      "MAE": 1.1233023312894903,
+      "RMSE": 3.870187330944789
+    },
+    "HistGradientBoosting": {
+      "R2": 0.8942680982002376,
+      "MAE": 1.1058501089280366,
+      "RMSE": 3.807397266417943
+    },
+    "Ensemble": {
+      "R2": 0.9035400851581529,
+      "MAE": 1.0747766567647796,
+      "RMSE": 3.636625744566451
+    },
+    "Baseline (District-Crop Median)": {
+      "R2": 0.9002934895614745,
+      "MAE": 0.8586629017361559,
+      "RMSE": 3.6973190655214956
+    }
+  }
+}
