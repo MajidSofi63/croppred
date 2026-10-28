@@ -1,0 +1,64 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# Environment variables (never commit real credentials)
+.env
+
+# Large data files and generated artefacts
+data/*.csv
+data/*.csv.gz
+data/*.json
+data/*.pkl
+data/*.geojson
+data/weather_cache/
+!data/.gitkeep
+
+# Trained models
+backend/models/*.pkl
+backend/models/*.joblib
+backend/models/*.json
+!backend/models/.gitkeep
+
+# Reports
+reports/*.json
+reports/*.md
+reports/*.png
+!reports/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

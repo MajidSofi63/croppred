@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="District-level crop suitability for India using three ML models, a weighted ensemble, and historical weather.">
+    <meta name="theme-color" content="#123c26">
+    <title>India Crop Recommendation System</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%B1%3C/text%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <!-- Hero header -->
+    <header class="header">
+        <div class="container hero-inner">
+            <div class="brand">
+                <span class="brand-mark" aria-hidden="true">🌱</span>
+                <span class="brand-name">CropSense <span>India</span></span>
+            </div>
+
+            <div class="hero-copy">
+                <span class="hero-eyebrow">Historical crop suitability · District level</span>
+                <h1 class="header-title">Find what grows best,<br>district by district.</h1>
+                <p class="header-subtitle">
+                    Pick a district and a planting season. Three ML models, a weighted
+                    ensemble, and a historical-median baseline compare 48 crops using
+                    real weather data.
+                </p>
+            </div>
+
+            <div class="hero-stats" aria-label="Dataset coverage">
+                <div class="hero-stat">
+                    <strong>666</strong>
+                    <span>districts</span>
+                </div>
+                <div class="hero-stat">
+                    <strong>48</strong>
+                    <span>crops</span>
+                </div>
+                <div class="hero-stat">
+                    <strong>1998–2011</strong>
+                    <span>history</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container main-container">
+        <!-- Input Section -->
+        <section class="input-section">
+            <div class="card input-card">
+                <div class="card-head">
+                    <div>
+                        <span class="eyebrow">Start here</span>
+                        <h2 class="card-title">Select location and season</h2>
+                        <p class="card-subtitle">
+                            Weather is fetched automatically — you only choose where and when.
+                        </p>
+                    </div>
+                    <span class="step-badge">01</span>
+                </div>
+
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label for="districtSearch" class="input-label">District</label>
+                        <div class="input-shell">
+                            <span class="input-icon" aria-hidden="true">📍</span>
+                            <input
+                                type="text"
+                                id="districtSearch"
+                                class="input-field"
+                                placeholder="Type a district name…"
+                                autocomplete="off"
+                            >
+                        </div>
+                        <div id="districtSuggestions" class="suggestions-dropdown"></div>
+                        <input type="hidden" id="districtId" value="">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="seasonSelect" class="input-label">Planting season</label>
+                        <div class="input-shell">
+                            <span class="input-icon" aria-hidden="true">🗓️</span>
+                            <select id="seasonSelect" class="input-field">
+                                <option value="">Select a season</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="recommendBtn" class="recommend-btn" disabled>
+                    <span>Get recommendations</span>
+                    <span class="btn-arrow" aria-hidden="true">→</span>
+                </button>
+
+                <p class="input-note">
+                    <span aria-hidden="true">ℹ️</span>
+                    The model uses a seasonal estimate from the 5 most recent years
+                    available, not a forecast. Live weather is shown for context only.
+                </p>
+            </div>
+        </section>
+
+        <!-- Weather Panel -->
+        <section id="weatherPanel" class="weather-section" style="display: none;">
+            <div class="card">
+                <div class="card-head">
+                    <div>
+                        <span class="eyebrow">Context</span>
+                        <h2 class="card-title">Weather used</h2>
+                        <p class="card-subtitle">Fetched automatically for the selected district.</p>
+                    </div>
+                    <span class="step-badge">02</span>
+                </div>
+
+                <div class="weather-subsection">
+                    <div class="subsection-head">
+                        <h3 class="weather-subtitle">Seasonal average</h3>
+                        <span class="source-badge">NASA POWER · model input</span>
+                    </div>
+                    <div class="weather-grid model-weather-grid">
+                        <div class="weather-item">
+                            <span class="weather-icon" aria-hidden="true">🌡️</span>
+                            <span class="weather-label">Temperature</span>
+                            <span id="modelTemp" class="weather-value">-- °C</span>
+                        </div>
+                        <div class="weather-item">
+                            <span class="weather-icon" aria-hidden="true">🌧️</span>
+                            <span class="weather-label">Rainfall</span>
+                            <span id="modelRain" class="weather-value">-- mm</span>
+                        </div>
+                        <div class="weather-item">
+                            <span class="weather-icon" aria-hidden="true">📅</span>
+                            <span class="weather-label">Years used</span>
+                            <span id="modelYears" class="weather-value">--</span>
+                        </div>
+                        <div class="weather-note-card">
+                            <span class="weather-note" id="weatherNote">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="weather-subsection">
+                    <div class="subsection-head">
+                        <h3 class="weather-subtitle">Today's conditions</h3>
+                        <span class="source-badge live">Open-Meteo · live</span>
+                    </div>
+                    <div class="weather-grid">
+                        <div class="weather-item">
+                            <span class="weather-icon" aria-hidden="true">🌡️</span>
+                            <span class="weather-label">Temperature</span>
+                            <span id="liveTemp" class="weather-value">-- °C</span>
+                        </div>
+                        <div class="weather-item">
+                            <span class="weather-icon" aria-hidden="true">💧</span>
+                            <span class="weather-label">Humidity</span>
+                            <span id="liveHumidity" class="weather-value">-- %</span>
+                        </div>
+                        <div class="weather-item">
+                            <span class="weather-icon" aria-hidden="true">🌧️</span>
+                            <span class="weather-label">Precipitation</span>
+                            <span id="livePrecip" class="weather-value">-- mm</span>
+                        </div>
+                        <div class="weather-item">
+                            <span class="weather-icon" aria-hidden="true">💨</span>
+                            <span class="weather-label">Wind speed</span>
+                            <span id="liveWind" class="weather-value">-- km/h</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="weather-subsection">
+                    <div class="subsection-head">
+                        <h3 class="weather-subtitle">7-day outlook</h3>
+                        <span class="source-badge muted">Display only</span>
+                    </div>
+                    <div id="forecastContainer" class="forecast-container">
+                        <!-- Forecast items are added by JavaScript. -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section id="resultsSection" class="results-section" style="display: none;">
+            <div class="results-layout">
+                <!-- Left Column - Recommendations -->
+                <div class="results-main">
+                    <div class="card">
+                        <div class="card-head">
+                            <div>
+                                <span class="eyebrow">Results</span>
+                                <h2 class="card-title">Crop recommendations</h2>
+                                <p class="location-info">
+                                    <span aria-hidden="true">📍</span>
+                                    <span id="resultDistrict">--</span>
+                                    <span class="location-divider">·</span>
+                                    <span id="resultSeason">--</span>
+                                </p>
+                            </div>
+                            <span class="step-badge">03</span>
+                        </div>
+
+                        <!-- Top Recommendation -->
+                        <div id="topRecommendation" class="top-recommendation">
+                            <!-- Populated by JavaScript. -->
+                        </div>
+
+                        <!-- Other Recommendations -->
+                        <h3 class="section-subtitle">Other strong matches</h3>
+                        <div id="otherRecommendations" class="other-recommendations">
+                            <!-- Populated by JavaScript. -->
+                        </div>
+
+                        <!-- Why This Crop -->
+                        <h3 class="section-subtitle">Why these crops</h3>
+                        <div id="reasonsSection" class="reasons-section">
+                            <!-- Populated by JavaScript. -->
+                        </div>
+
+                        <!-- Limitations -->
+                        <h3 class="section-subtitle">Read this before acting</h3>
+                        <div id="limitationsSection" class="limitations-section">
+                            <!-- Populated by JavaScript. -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column - Model Outputs Sidebar -->
+                <div class="results-sidebar">
+                    <div class="card sidebar-card">
+                        <div class="sidebar-head">
+                            <div>
+                                <span class="eyebrow">Under the hood</span>
+                                <h2 class="card-title">Model outputs</h2>
+                            </div>
+                            <span class="live-dot" title="Models loaded"></span>
+                        </div>
+                        <p class="sidebar-subtitle">
+                            Each model's own prediction, its ensemble weight, and its
+                            held-out test metrics. Expand a card for details.
+                        </p>
+                        <div id="modelOutputs" class="model-outputs">
+                            <!-- Populated by JavaScript. -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="loading-state" style="display: none;">
+            <div class="loading-card">
+                <div class="loading-spinner"></div>
+                <p>Analysing crop suitability…</p>
+                <span>Comparing models, history, and weather</span>
+            </div>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorState" class="error-state" style="display: none;">
+            <div class="error-card">
+                <span class="error-icon" aria-hidden="true">⚠️</span>
+                <div>
+                    <h3>Something went wrong</h3>
+                    <p id="errorMessage"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <p>
+                <strong>Historical suitability, not a current advisory.</strong>
+                Data ends in 2011-12, uses district-level averages, and excludes soil,
+                irrigation, price, and satellite data.
+            </p>
+            <p class="footer-meta">
+                FastAPI · RandomForest / XGBoost / HistGradientBoosting · NASA POWER + Open-Meteo
+            </p>
+        </div>
+    </footer>
+
+    <script src="static/app.js"></script>
+</body>
+</html>
